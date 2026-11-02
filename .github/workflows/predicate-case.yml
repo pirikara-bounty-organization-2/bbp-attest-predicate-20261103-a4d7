@@ -1,0 +1,26 @@
+name: Controlled predicate case probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Create a custom-type attestation
+        id: attest
+        uses: actions/attest@v4
+        with:
+          subject-path: artifact.txt
+          predicate-type: HTTPS://SLSA.DEV/PROVENANCE/V1
+          predicate: '{"bbp_control":true,"expected_default_verification":false}'
+      - name: Record sanitized result
+        env:
+          ATTESTATION_ID: ${{ steps.attest.outputs.attestation-id }}
+        run: echo "attestation_id=${ATTESTATION_ID}"
